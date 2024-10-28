@@ -30,6 +30,7 @@ public final class PostgreSqlSessionProperties
 {
     public static final String ARRAY_MAPPING = "array_mapping";
     public static final String ENABLE_STRING_PUSHDOWN_WITH_COLLATE = "enable_string_pushdown_with_collate";
+    public static final String CONVERT_DECIMAL_TO_VARCHAR = "enable_convert_decimal_to_varchar";
 
     private final List<PropertyMetadata<?>> sessionProperties;
 
@@ -47,6 +48,12 @@ public final class PostgreSqlSessionProperties
                         ENABLE_STRING_PUSHDOWN_WITH_COLLATE,
                         "Enable string pushdown with collate (experimental)",
                         postgreSqlConfig.isEnableStringPushdownWithCollate(),
+                        false))
+                ,
+                booleanProperty(
+                        CONVERT_DECIMAL_TO_VARCHAR,
+                        "Enable converting decimal columns to varchar",
+                        postgreSqlConfig.isEnableConvertDecimalToVarchar(),
                         false));
     }
 
@@ -64,5 +71,10 @@ public final class PostgreSqlSessionProperties
     public static boolean isEnableStringPushdownWithCollate(ConnectorSession session)
     {
         return session.getProperty(ENABLE_STRING_PUSHDOWN_WITH_COLLATE, Boolean.class);
+    }
+    
+    public static boolean isEnableConvertDecimalToVarchar(ConnectorSession session)
+    {
+        return session.getProperty(CONVERT_DECIMAL_TO_VARCHAR, Boolean.class);
     }
 }

@@ -187,6 +187,7 @@ import static io.trino.plugin.jdbc.StandardColumnMappings.varcharWriteFunction;
 import static io.trino.plugin.jdbc.TypeHandlingJdbcSessionProperties.getUnsupportedTypeHandling;
 import static io.trino.plugin.jdbc.UnsupportedTypeHandling.CONVERT_TO_VARCHAR;
 import static io.trino.plugin.jdbc.UnsupportedTypeHandling.IGNORE;
+import static io.trino.plugin.postgresql.PostgreSqlSessionProperties.isEnableConvertDecimalToVarchar;
 import static io.trino.plugin.postgresql.PostgreSqlConfig.ArrayMapping.AS_ARRAY;
 import static io.trino.plugin.postgresql.PostgreSqlConfig.ArrayMapping.AS_JSON;
 import static io.trino.plugin.postgresql.PostgreSqlConfig.ArrayMapping.DISABLED;
@@ -623,8 +624,11 @@ public class PostgreSqlClient
                     }
                 }
                 precision = columnSize + max(-decimalDigits, 0); // Map decimal(p, -s) (negative scale) to decimal(p+s, 0).
-                if (columnSize == PRECISION_OF_UNSPECIFIED_DECIMAL || precision > Decimals.MAX_PRECISION) {
-                    break;
+                if (columnSize == PRECISION_OF_UNSPECIFIED_DECIMAL || precision > Decimals.MAX_PRECISION || precision <= 0) {
+                    if (isEnableConvertDecimalToVarchar(session) == true) {
+                        return mapToUnboundedVarchar(typeHandle);
+                    }
+                    return Optional.of(doubleColumnMapping());
                 }
                 return Optional.of(decimalColumnMapping(createDecimalType(precision, max(decimalDigits, 0)), UNNECESSARY));
             }

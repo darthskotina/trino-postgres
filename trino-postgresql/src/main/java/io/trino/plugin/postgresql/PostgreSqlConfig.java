@@ -100,5 +100,4 @@ public class PostgreSqlConfig
         this.enableConvertDecimalToVarchar = enableConvertDecimalToVarchar;
         return this;
     }
-
 }

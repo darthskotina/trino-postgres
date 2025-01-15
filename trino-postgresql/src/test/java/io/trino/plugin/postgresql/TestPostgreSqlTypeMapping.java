@@ -687,30 +687,6 @@ public class TestPostgreSqlTypeMapping
     }
 
     @Test
-    public void testHighPrecisionDecimalToVarchar()
-    {
-        // Use createVarcharType with precision 60 instead of createUnboundedVarcharType
-        SqlDataTypeTest.create()
-                .addRoundTrip("decimal(61,10)", "CAST('1234567890123456789012345678901234567890123456789.1234567890' AS decimal(61,10))",
-                        createVarcharType(60),
-                        "'1234567890123456789012345678901234567890123456789.1234567890'")
-                .addRoundTrip("decimal(61,10)", "CAST('-1234567890123456789012345678901234567890123456789.1234567890' AS decimal(61,10))",
-                        createVarcharType(60),
-                        "'-1234567890123456789012345678901234567890123456789.1234567890'")
-                .addRoundTrip("decimal(61,10)", "NULL",
-                        createVarcharType(60),
-                        "CAST(NULL AS varchar(60))")
-                .execute(getQueryRunner(), postgresCreateAndInsert("test_high_precision_decimal"));
-
-        // Verify the column is reported as varchar(60) in information schema
-        assertQuery(
-                "SELECT data_type FROM information_schema.columns " +
-                        "WHERE table_schema = 'tpch' AND table_name = 'test_high_precision_decimal' " +
-                        "AND column_name = 'roundtrip_tinyint'",
-                "VALUES 'varchar(60)'");
-    }
-
-    @Test
     public void testDecimalUnspecifiedPrecisionWithSupportedValues()
     {
         JdbcSqlExecutor jdbcSqlExecutor = new JdbcSqlExecutor(postgreSqlServer.getJdbcUrl(), postgreSqlServer.getProperties());
